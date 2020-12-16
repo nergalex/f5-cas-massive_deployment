@@ -10,6 +10,7 @@ Ansible Tower
 Role
 ***************************
 Clone roles from `NGINX Controller collection <https://github.com/nginxinc/ansible-collection-nginx_controller>`_ in `/etc/ansible/roles/`
+
 - nginxinc.nginx_controller_generate_token
 - nginxinc.nginx_controller_certificate
 - nginxinc.nginx_controller_gateway
