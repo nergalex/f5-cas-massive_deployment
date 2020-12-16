@@ -103,7 +103,7 @@ Extra variable                                  Description                     
         crt: "-----BEGIN CERTIFICATE-----\r\nXXXXXXXXXXXXXXXXXXX\r\n-----END CERTIFICATE-----"
         key: "-----BEGIN RSA PRIVATE KEY-----\r\nXXXXXXXXXXXXXXX\r\n-----END RSA PRIVATE KEY-----"
 
-0) Delete Applications
+1) Delete Applications
 ==================================================
 Workflow
 ###############################
