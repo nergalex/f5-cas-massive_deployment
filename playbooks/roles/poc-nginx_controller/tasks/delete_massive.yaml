@@ -20,8 +20,12 @@
     status_code: 200, 201, 202
   loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
   loop_control:
-    pause: 20
+    pause: 15
   ignore_errors: yes
+
+- name: DELETE Last Component
+  pause:
+    seconds: 15
 
 - name: DELETE App
   uri:
@@ -46,3 +50,7 @@
   loop_control:
     pause: 30
   ignore_errors: yes
+
+- name: DELETE Last GW
+  pause:
+    seconds: 30
