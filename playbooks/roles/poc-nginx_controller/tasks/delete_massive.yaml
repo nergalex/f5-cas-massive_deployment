@@ -1,0 +1,48 @@
+- name: SET extra_environments
+  set_fact:
+    var_env_prefix: "env_north_"
+
+- name: Retrieve the NGINX Controller auth token
+  include_role:
+    name: nginxinc.nginx_controller_generate_token
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_user_email: "{{extra_nginx_controller_username}}"
+    nginx_controller_user_password: "{{extra_nginx_controller_password}}"
+
+- name: DELETE Component
+  uri:
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/app_{{ extra_app.name | lower }}.{{ extra_app.domain | lower }}{{ item.0 }}/components/adc_{{ extra_app.components[item.1].name | lower }}"
+    method: DELETE
+    headers:
+      "Cookie": "session={{ nginx_controller_auth_token }}"
+    validate_certs: no
+    status_code: 200, 201, 202
+  loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
+  loop_control:
+    pause: 20
+  ignore_errors: yes
+
+- name: DELETE App
+  uri:
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/app_{{ extra_app.name | lower }}.{{ extra_app.domain | lower }}{{ item }}"
+    method: DELETE
+    headers:
+      "Cookie": "session={{ nginx_controller_auth_token }}"
+    validate_certs: no
+    status_code: 200, 201, 202, 204
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  ignore_errors: yes
+
+- name: DELETE GW
+  uri:
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/gw_{{ extra_app.name | lower }}{{ item }}"
+    method: DELETE
+    headers:
+      "Cookie": "session={{ nginx_controller_auth_token }}"
+    validate_certs: no
+    status_code: 200, 201, 202, 204
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  loop_control:
+    pause: 30
+  ignore_errors: yes

@@ -1,0 +1,94 @@
+- name: SET variables
+  set_fact:
+    var_env_prefix: "env_north_"
+    var_instance_ids: []
+    var_tls_enabled: yes
+
+- name: Retrieve the NGINX Controller auth token
+  include_role:
+    name: nginxinc.nginx_controller_generate_token
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_user_email: "{{extra_nginx_controller_username}}"
+    nginx_controller_user_password: "{{extra_nginx_controller_password}}"
+
+### Pre-requisites - Define instances from a specific location. A location is a Azure VM Scale Set
+- name: GET instances ID
+  uri:
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/infrastructure/locations/{{ extra_app.gateways.location | lower }}/instances"
+    method: GET
+    headers:
+      "Content-Type": "application/json"
+      "Cookie": "session={{ nginx_controller_auth_token }}"
+    return_content: yes
+    validate_certs: no
+    status_code: 200
+  register: instances
+
+- name: SET var_instance_ids
+  set_fact:
+    var_instance_ids: "{{ var_instance_ids }} + [ {
+      'name': '{{ item.metadata.name }}',
+      'location': '{{ extra_app.gateways.location | lower }}',
+      'ref': '{{ item.metadata.ref }}'
+    }]"
+  loop: "{{ instances.json['items'] }}"
+
+### Launch massive deployment
+- name: Create the environment
+  include_role:
+    name: nginxinc.nginx_controller_environment
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environment: "{{ lookup('template','massive_environment.json') }}"
+
+- name: Create certificate object
+  include_role:
+    name: nginxinc.nginx_controller_certificate
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_certificate: "{{ lookup('template','massive_cert.json') }}"
+  loop: "{{ range(1, extra_nb_app + 1) | list }}"
+  loop_control:
+    index_var: index
+  when: var_tls_enabled == 'yes'
+
+- name: Create a gateway
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_gateway: "{{ lookup('template','massive_gateway.json') }}"
+  loop: "{{ range(1, extra_nb_app + 1) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create an application
+  include_role:
+    name: nginxinc.nginx_controller_application
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_app: "{{ lookup('template','massive_application.json') }}"
+  loop: "{{ range(1, extra_nb_app + 1) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create components
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_appName: "app_{{ extra_app.name | lower }}.{{ extra_app.domain | lower }}{{ item.0 }}"
+    nginx_controller_component: "{{ lookup('template','massive_component_adc.json') }}"
+  loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
+
+
+
+
+
+
+
