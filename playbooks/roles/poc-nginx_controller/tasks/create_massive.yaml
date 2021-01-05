@@ -52,7 +52,6 @@
   loop: "{{ range(1, extra_nb_app + 1) | list }}"
   loop_control:
     index_var: index
-  when: var_tls_enabled == 'yes'
 
 - name: Create a gateway
   include_role:

@@ -64,7 +64,7 @@
     "security": {
       "waf": {
         "isEnabled": true,
-        "isMonitorOnly": false,
+        "isMonitorOnly": true,
         "signatureOverrides": {}
       }
     }
