@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "name": "{{ extra_app.components[item.1].name | lower }}",
+    "displayName": "{{ extra_app.components[item.1].name | lower }}",
+    "description": "WAF {{ extra_app.components[item.1].waf_policy.name | lower }}"
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "{{ extra_app.components[item.1].uri }}": {
+          "matchMethod": "PREFIX"
+        }
+      },
+      "gatewayRefs": [
+        {
+          "ref": "/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/cn_{{extra_app.name | lower}}{{ item.0 }}.{{extra_app.domain | lower}}"
+        }
+      ]
+    },
+    "backend": {
+      "httpVersion": "1.1",
+      "ntlmAuthentication": "DISABLED",
+      "preserveHostHeader": "ENABLED",
+      "workloadGroups": {
+        "wlg_{{ extra_app.components[item.1].name | lower }}": {
+          "loadBalancingMethod": {
+            "type": "LEAST_CONNECTIONS"
+          },
+          "sessionPersistence": {
+            "type": "COOKIE"
+          },
+          "uris": {
+            {%- for workload in extra_app.components[item.1].workloads -%}
+            "http://{{ workload }}": {
+              "isBackup": false,
+              "isDown": false,
+              "isDrain": false
+            }{%- if not loop.last -%},{% endif %}
+            {%- endfor -%}
+          }
+        }
+      },
+      "monitoring": {
+        "defaultState": "HEALTHY",
+        "interval": 5,
+        "consecutiveSuccessThreshold": 3,
+        "consecutiveFailureThreshold": 3,
+        "uri": "{{ extra_app.components[item.1].uri }}",
+        "response": {
+          "status": {
+            "codes": [
+              200
+            ],
+            "match": true
+          }
+        }
+      }
+    },
+    "logging": {
+      "accessLog": {
+        "state": "DISABLED"
+      },
+      "errorLog": "DISABLED"
+    },
+    "programmability": {
+      "requestHeaderModifications": [
+        {
+          "action": "ADD",
+          "headerName": "X-Forwarded-For",
+          "headerValue": "$remote_addr"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Forwarded-Proto",
+          "headerValue": "$scheme"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Real-IP",
+          "headerValue": "$remote_addr"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Forwarded-Host",
+          "headerValue": "$http_host"
+        },
+        {
+          "action": "ADD",
+          "headerName": "Host",
+          "headerValue": "$http_host"
+        },
+        {
+          "action": "ADD",
+          "headerName": "Connection",
+          "headerValue": "''"
+        }
+      ],
+      "responseHeaderModifications": [
+        {
+          "action": "ADD",
+          "headerName": "X-Frame-Options",
+          "headerValue": "SAMEORIGIN",
+          "responseCodeFilter": "ALWAYS"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-Content-Type-Options",
+          "headerValue": "nosniff",
+          "responseCodeFilter": "ALWAYS"
+        },
+        {
+          "action": "ADD",
+          "headerName": "X-XSS-Protection",
+          "headerValue": "'1; mode=block'",
+          "responseCodeFilter": "ALWAYS"
+        },
+        {
+          "action": "ADD",
+          "headerName": "Strict-Transport-Security",
+          "headerValue": "'max-age=15552001; includeSubDomains;'",
+          "responseCodeFilter": "ALWAYS"
+        }
+      ]
+    },
+    "security": {
+      {%- if extra_app.components[item.1].waf_policy.name == 'generic' -%}
+        "strategyRef": {
+          "ref": "/security/strategies/balanced_default"
+        },
+        "waf": {
+          "isEnabled": true,
+          "isMonitorOnly": false,
+          "signatureOverrides": {
+            "200002195": {
+              "action": "IGNORE"
+            }
+          }
+        }
+      {% else -%}
+        "strategyRef": {
+          "ref": "/security/strategies/{{ extra_app.components[item.1].waf_policy.name }}"
+        },
+        "waf": {
+          "isEnabled": true,
+          "isMonitorOnly": false,
+          "signatureOverrides": {}
+        }
+      {% endif -%}
+    }
+  }
+}

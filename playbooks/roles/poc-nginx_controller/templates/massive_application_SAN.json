@@ -1,0 +1,7 @@
+{
+  "metadata": {
+    "name": "san_{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}",
+    "displayName": "SAN of {{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}",
+    "description": "Redirect SAN to CN"
+  }
+}

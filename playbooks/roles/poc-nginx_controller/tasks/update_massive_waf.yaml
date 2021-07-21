@@ -1,0 +1,51 @@
+- name: Retrieve the NGINX Controller auth token
+  include_role:
+    name: nginxinc.nginx_controller_generate_token
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_user_email: "{{extra_nginx_controller_username}}"
+    nginx_controller_user_password: "{{extra_nginx_controller_password}}"
+
+- name: UPDATE WAF policy
+  uri:
+    url: "https://{{ extra_nginx_controller.ip }}/api/v1/security/policies/{{ item.waf_policy.name }}"
+    method: PUT
+    headers:
+      "Content-Type": "application/json"
+      "Cookie": "{{ nginx_controller_auth_token }}"
+    body: "{{ lookup('template','massive_policy_waf.json') }}"
+    body_format: json
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+  loop: "{{ extra_waf_policies }}"
+
+- name: GET gateways CN
+  uri:
+    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ item.env_name }}/gateways/{{ item.gw_name }}"
+    method: GET
+    headers:
+      "Content-Type": "application/json"
+      "Cookie": "{{ nginx_controller_auth_token }}"
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+  loop: "{{ extra_waf_policies }}"
+  register: var_gw
+
+- name: UPDATE gateways CN
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_environmentName: "{{ item.0.env_name }}"
+    nginx_controller_gateway: "{{ item.1.json }}"
+  loop: "{{ extra_waf_policies | zip(var_gw.results) | list }}"
+
+
+
+
+
+
+
+

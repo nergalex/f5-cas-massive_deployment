@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "name": "gw_{{extra_app.domain | lower}}_http2https",
+    "displayName": "Gateway {{extra_app.domain | lower}} http2https",
+    "description": "Redirect HTTP to HTTPS"
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "http://.*.{{ extra_app.domain | lower }}": {
+          "matchMethod": "REGEX"
+        }
+      },
+      "placement": {
+        "instanceRefs": [
+          {%- for gw in var_instance_ids -%}
+          {
+            "ref": "{{ gw.ref }}"
+          }{%- if not loop.last -%},{% endif %}
+          {%- endfor -%}
+        ]
+      }
+    }
+  }
+}

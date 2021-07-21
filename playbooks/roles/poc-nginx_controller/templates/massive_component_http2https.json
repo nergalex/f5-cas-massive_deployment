@@ -1,0 +1,47 @@
+{
+  "metadata": {
+    "name": "{{ extra_app.domain | lower }}_http2https",
+    "displayName": "{{ extra_app.domain | lower }} http2https",
+    "description": "Redirect HTTP to HTTPS"
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "/": {
+          "matchMethod": "PREFIX"
+        }
+      },
+      "gatewayRefs": [
+        {
+          "ref": "/services/environments/{{ var_env_prefix }}{{extra_app.environment | lower}}/gateways/gw_{{extra_app.domain | lower}}_http2https"
+        }
+      ]
+    },
+    "backend": {
+      "ntlmAuthentication": "DISABLED",
+      "preserveHostHeader": "DISABLED"
+    },
+    "programmability": {
+      "uriRedirects": [
+        {
+          "responseCode": 301,
+          "url": "https://$host$request_uri"
+        }
+      ]
+    },
+    "logging": {
+      "accessLog": {
+        "state": "DISABLED"
+      },
+      "errorLog": "DISABLED"
+    },
+    "security": {
+      "strategyRef": {
+        "ref": "/security/strategies/balanced_default"
+      },
+      "waf": {
+        "isEnabled": false
+      }
+    }
+  }
+}

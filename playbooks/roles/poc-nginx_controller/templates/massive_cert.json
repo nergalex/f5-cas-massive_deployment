@@ -6,7 +6,7 @@
   },
   "desiredState": {
     "type": "PEM",
-    "privateKey": "{%- for line in extra_app.tls.key.split('\r\n') -%}{{ line }}\n{%- endfor -%}",
-    "publicCert": "{%- for line in extra_app.tls.crt.split('\r\n') -%}{{ line }}\n{%- endfor -%}"
+    "privateKey": "{%- for line in stats_key_pair[index].key.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}",
+    "publicCert": "{%- for line in stats_key_pair[index].crt.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}"
   }
 }

@@ -1,6 +1,7 @@
 Test deployment perf on CAS
 =======================================================================
 .. contents:: Table of Contents
+    :local:
 
 Pre-requisites
 ==============
@@ -18,7 +19,7 @@ Clone roles from `NGINX Controller collection <https://github.com/nginxinc/ansib
 - nginxinc.nginx_controller_component
 - nginxinc.nginx_controller_environment
 
-Rename generated directory of these roles as listed above
+Rename generated directory of cloned roles as listed above
 
 Ansible role structure
 ######################
@@ -45,9 +46,15 @@ Ansible role structure
 
 - The specified ``play`` contains ``tasks`` to execute. Example: play=``create_hub_edge_security_inbound.yaml``
 
-CAS
-##############
-- Instances deployed and attached to a location
+Pre-requisites
+####################################
+- NGINX Controller installed
+- NGINX Controller Application Security licensed
+- NGINX Controller Application Security enabled using ``./helper.sh setfeature AppSec true``
+- NGINX App Protect instances installed
+-
+- and attached to a ``Location`` in NGINX Controller
+- NGINX App Protect & NGINX Controller
 
 0) Create Applications
 ==================================================
@@ -56,53 +63,73 @@ Workflow
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
 Job template                                                    objective                                           playbook                                        activity                                          inventory                                       limit                                           credential
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
-``poc-nginx_controller-create_massive``                         Create App                                          ``playbooks/poc-nginx_controller.yaml``         ``create_massive_gw_app_component_vmss_north``    localhost
+``poc-nginx_controller-create_massive``                         Create App                                          ``playbooks/poc-nginx_controller.yaml``         ``create_massive``                                localhost
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
 
 ==============================================  =============================================   ================================================================================================================================================================================================================
 Extra variable                                  Description                                     Example
 ==============================================  =============================================   ================================================================================================================================================================================================================
-``extra_nb_app``                                number of Apps to deploy                        ``10``
-``extra_nginx_controller_ip``                   NGINX Controller IP or FQDN                     ``10.0.0.10``
-``extra_nginx_controller_username``             NGINX Controller admin credential               ``XXXXXXXX@acme.com``
-``extra_nginx_controller_password``             NGINX Controller admin credential               ``XXXXXXXX``
-``extra_app``                                   App specifications                              dict, see below
+``extra_nb_app``                                survey: number of Apps to deploy                ``250``
+``extra_nginx_controller.ip``                   NGINX Controller IP or FQDN                     ``10.0.0.4``
+``extra_nginx_controller_username``             survey: NGINX Controller admin credential       ``XXXXXXXX@acme.com``
+``extra_nginx_controller_password``             survey: NGINX Controller admin credential       ``XXXXXXXX``
+``extra_app``                                   App specifications                              dict
+``extra_app.gateways.location``                 Location of instances                           ``nginxwaf``
+``extra_app.domain``                            Domain for all Apps                             ``f5app.dev``
+``extra_app.environment``                       Resource Group used for RBAC                    ``massive``
+``extra_app.components``                        PATH of each App                                dict
+``extra_app.components.name``                   Component's logical name                        ``main`` for PATH ``/``
+``extra_app.components.uri``                    Component's URI                                 ``/``
+``extra_app.components.waf_policy``             attached WAF policy to component                dict
+``extra_app.components.waf_policy.name``        WAF policy's name                               ``web_factory_arcadia``
+``extra_app.components.waf_policy.waf_policy``  WAF policy's repository URL                     ``https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_web_factory.json``
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 .. code:: yaml
 
     extra_app:
       components:
-        - name: Arcadia_main
-          type: adc
+        - name: main
           uri: /
+          waf_policy:
+            name: web_factory_arcadia
+            url: >-
+              https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_web_factory.json
           workloads:
-            - 'https://arcadia.acme.dev'
-        - name: Arcadia_app2
-          type: adc
-          uri: /api/
+            - 10.12.1.5
+        - name: login
+          uri: /trading/login.php
+          waf_policy:
+            name: bot_prevention
+            url: >-
+              https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_bot_prevention.json
           workloads:
-            - 'https://arcadia.acme.dev'
-        - name: Arcadia_app3
-          type: adc
-          uri: /app3/
+            - 10.12.1.5
+        - name: acme
+          uri: /.well-known/acme-challenge
+          waf_policy:
+            name: generic
+            url: generic
           workloads:
-            - 'https://arcadia.acme.dev'
-        - name: Arcadia_db
-          type: adc
-          uri: /files/
+            - 127.0.0.1
+        - name: security.txt
+          uri: /.well-known/security.txt
+          waf_policy:
+            name: generic
+            url: generic
           workloads:
-            - 'https://arcadia.acme.dev'
-      domain: acme.dev
-      environment: prod
+            - 127.0.0.1
+      domain: f5app.dev
+      environment: massive
       gateways:
         location: nginxwaf
-      monitor_uri: /
-      name: arcadia-test
-      preserveHostHeader: ENABLED
-      tls:
-        crt: "-----BEGIN CERTIFICATE-----\r\nXXXXXXXXXXXXXXXXXXX\r\n-----END CERTIFICATE-----"
-        key: "-----BEGIN RSA PRIVATE KEY-----\r\nXXXXXXXXXXXXXXX\r\n-----END RSA PRIVATE KEY-----"
+      name: demo
+    extra_nb_app: 250
+    extra_nginx_controller:
+      ip: 10.0.0.4
+    extra_nginx_controller_password: $encrypted$
+    extra_nginx_controller_username: nergalex@acme.com
+    extra_project: cloudbuilder
 
 1) Delete Applications
 ==================================================
