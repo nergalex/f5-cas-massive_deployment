@@ -46,20 +46,43 @@ Ansible role structure
 
 - The specified ``play`` contains ``tasks`` to execute. Example: play=``create_hub_edge_security_inbound.yaml``
 
-Pre-requisites
+Infrastructure
 ####################################
 - NGINX Controller installed
 - NGINX Controller Application Security licensed
 - NGINX Controller Application Security enabled using ``./helper.sh setfeature AppSec true``
 - NGINX App Protect instances installed
--
-- and attached to a ``Location`` in NGINX Controller
-- NGINX App Protect & NGINX Controller
+- NGINX Controller agent installed into NGINX App Protect instances installed using a same ``Location`` for both
 
-0) Create Applications
+1.1) Create Certificate
 ==================================================
-Workflow
-###############################
+===============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
+Job template                                                      objective                                           playbook                                        activity                                          inventory                                       limit                                           credential
+===============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
+``poc-nginx_controller-create_massive_self_signed_certificate``   Create App                                          ``playbooks/poc-nginx_controller.yaml``         ``create_massive_self_signed_certificate``        localhost
+===============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
+
+==============================================  =============================================   ================================================================================================================================================================================================================
+Extra variable                                  Description                                     Example
+==============================================  =============================================   ================================================================================================================================================================================================================
+``extra_nb_app``                                survey: number of Apps to deploy                ``250``
+``extra_project``                               project name                                    ``cloudbuilder``
+``extra_app``                                   App specifications                              dict
+``extra_app.domain``                            Domain for all Apps                             ``f5app.dev``
+``extra_app.name``                              Application name                                ``demo``
+==============================================  =============================================   ================================================================================================================================================================================================================
+
+.. code:: yaml
+
+    extra_app:
+      domain: f5app.dev
+      name: demo
+    extra_nb_app: 250
+    extra_project: cloudbuilder
+
+
+1.2) Create Applications
+==================================================
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
 Job template                                                    objective                                           playbook                                        activity                                          inventory                                       limit                                           credential
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
@@ -83,6 +106,7 @@ Extra variable                                  Description                     
 ``extra_app.components.waf_policy``             attached WAF policy to component                dict
 ``extra_app.components.waf_policy.name``        WAF policy's name                               ``web_factory_arcadia``
 ``extra_app.components.waf_policy.waf_policy``  WAF policy's repository URL                     ``https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_web_factory.json``
+``extra_app.name``                              Application name                                ``demo``
 ==============================================  =============================================   ================================================================================================================================================================================================================
 
 .. code:: yaml
@@ -131,14 +155,12 @@ Extra variable                                  Description                     
     extra_nginx_controller_username: nergalex@acme.com
     extra_project: cloudbuilder
 
-1) Delete Applications
+2) Delete Applications
 ==================================================
-Workflow
-###############################
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
 Job template                                                    objective                                           playbook                                        activity                                          inventory                                       limit                                           credential
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
-``poc-nginx_controller-delete_massive``                         Delete App                                          ``playbooks/poc-nginx_controller.yaml``         ``delete_massive_gw_app_component_vmss_north``    localhost
+``poc-nginx_controller-delete_massive``                         Delete App                                          ``playbooks/poc-nginx_controller.yaml``         ``delete_massive``                                localhost
 =============================================================   =============================================       =============================================   ===============================================   =============================================   =============================================   =============================================
 
 ==============================================  =============================================   ================================================================================================================================================================================================================
@@ -153,12 +175,24 @@ Extra variable                                  Description                     
 
 .. code:: yaml
 
+    activity: delete_massive
+    extra_nginx_controller:
+      ip: 10.0.0.4
+    extra_project: "cloudbuilder"
     extra_app:
+      gateways:
+        location: "nginxwaf"
+      name: "demo"
+      domain: "f5app.dev"
+      environment: massive
       components:
-        - name: Arcadia_main
-        - name: Arcadia_app2
-        - name: Arcadia_app3
-        - name: Arcadia_db
-      domain: acme.dev
-      environment: prod
-      name: arcadia-test
+        - name: main
+        - name: login
+        - name: acme
+    extra_nb_app: 250
+    extra_nginx_controller_password: $encrypted$
+    extra_nginx_controller_username: nergalex@acme.com
+
+
+
+
