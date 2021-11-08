@@ -2,6 +2,7 @@
   "metadata": {
     "name": "cn_{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}",
     "displayName": "{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}",
-    "description": "components of Common Name"
+    "description": "components of Common Name",
+    "tags": ["{{extra_app.name | lower}}{{ index }}"]
   }
 }

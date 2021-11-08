@@ -6,39 +6,42 @@
   include_role:
     name: nginxinc.nginx_controller_generate_token
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_user_email: "{{extra_nginx_controller_username}}"
     nginx_controller_user_password: "{{extra_nginx_controller_password}}"
 
-- name: DELETE Component CN
-  uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/cn_{{ extra_app.name | lower }}{{ item.0 }}.{{ extra_app.domain | lower }}/components/{{ extra_app.components[item.1].name | lower }}"
-    method: DELETE
-    headers:
-      "Cookie": "session={{ nginx_controller_auth_token }}"
-    validate_certs: no
-    status_code: 200, 201, 202
-  loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
-  loop_control:
-    pause: 5
+#- name: DELETE Component CN
+#  uri:
+#    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/cn_{{ extra_app.name | lower }}{{ item.0 }}.{{ extra_app.domain | lower }}/components/{{ extra_app.components[item.1].name | lower }}"
+#    method: DELETE
+#    headers:
+#      "Cookie": "session={{ nginx_controller_auth_token }}"
+#    validate_certs: no
+#    status_code: 200, 201, 202
+#  loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
+#  loop_control:
+#    pause: 30
 
-- name: DELETE Last Component CN
-  pause:
-    seconds: 5
+#- name: DELETE Last Component CN
+#  pause:
+#    seconds: 5
 
-- name: DELETE App CN
-  uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/cn_{{ extra_app.name | lower }}{{ item.0 }}.{{ extra_app.domain | lower }}"
-    method: DELETE
-    headers:
-      "Cookie": "session={{ nginx_controller_auth_token }}"
-    validate_certs: no
-    status_code: 200, 201, 202, 204
-  loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
+#- name: DELETE App CN
+#  uri:
+#    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/cn_{{ extra_app.name | lower }}{{ item.0 }}.{{ extra_app.domain | lower }}"
+#    method: DELETE
+#    headers:
+#      "Cookie": "session={{ nginx_controller_auth_token }}"
+#    validate_certs: no
+#    status_code: 200, 201, 202, 204
+#  loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
+#  loop_control:
+#    pause: 2
+#    index_var: index
 
 - name: DELETE GW CN
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/cn_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/cn_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}"
     method: DELETE
     headers:
       "Cookie": "session={{ nginx_controller_auth_token }}"
@@ -46,16 +49,16 @@
     status_code: 200, 201, 202, 204
   loop: "{{ range(1, extra_nb_app + 1) | list }}"
   loop_control:
-    pause: 5
+    pause: 15
     index_var: index
 
 - name: DELETE Last GW CN
   pause:
-    seconds: 5
+    seconds: 15
 
 - name: DELETE Component SAN
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/san_{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}/components/san_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/san_{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}/components/san_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}"
     method: DELETE
     headers:
       "Cookie": "session={{ nginx_controller_auth_token }}"
@@ -63,16 +66,16 @@
     status_code: 200, 201, 202
   loop: "{{ range(0, extra_nb_app) | list }}"
   loop_control:
-    pause: 5
+    pause: 15
     index_var: index
 
 - name: DELETE Last Component SAN
   pause:
-    seconds: 5
+    seconds: 15
 
 - name: DELETE App SAN
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/san_{{ extra_app.name | lower }}{{ index }}.{{ extra_app.domain | lower }}"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/san_{{ extra_app.name | lower }}{{ index }}.{{ extra_app.domain | lower }}"
     method: DELETE
     headers:
       "Cookie": "session={{ nginx_controller_auth_token }}"
@@ -84,7 +87,7 @@
 
 - name: DELETE GW SAN
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/san_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/san_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}"
     method: DELETE
     headers:
       "Cookie": "session={{ nginx_controller_auth_token }}"
@@ -92,16 +95,17 @@
     status_code: 200, 201, 202, 204
   loop: "{{ range(0, extra_nb_app) | list }}"
   loop_control:
-    pause: 5
+    pause: 15
     index_var: index
+  ignore_errors: yes
 
 - name: DELETE Last GW SAN
   pause:
-    seconds: 5
+    seconds: 15
 
 - name: DELETE Component http2https
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/app_{{ extra_app.domain | lower}}_http2https/components/{{ extra_app.domain | lower }}_http2https"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/app_{{ extra_app.domain | lower}}_http2https/components/{{ extra_app.domain | lower }}_http2https"
     method: DELETE
     headers:
       "Cookie": "session={{ nginx_controller_auth_token }}"
@@ -110,11 +114,11 @@
 
 - name: DELETE Last Component http2https
   pause:
-    seconds: 5
+    seconds: 15
 
 - name: DELETE App http2https
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/app_{{ extra_app.domain | lower}}_http2https"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/apps/app_{{ extra_app.domain | lower}}_http2https"
     method: DELETE
     headers:
       "Cookie": "session={{ nginx_controller_auth_token }}"
@@ -123,7 +127,7 @@
 
 - name: DELETE GW http2https
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/gw_{{extra_app.domain | lower}}_http2https"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/services/environments/{{ var_env_prefix }}{{ extra_app.environment | lower }}/gateways/gw_{{extra_app.domain | lower}}_http2https"
     method: DELETE
     headers:
       "Cookie": "session={{ nginx_controller_auth_token }}"
@@ -133,4 +137,4 @@
 
 - name: DELETE Last GW http2https
   pause:
-    seconds: 5
+    seconds: 15

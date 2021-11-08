@@ -2,7 +2,8 @@
   "metadata": {
     "name": "{{ extra_app.components[item.1].name | lower }}",
     "displayName": "{{ extra_app.components[item.1].name | lower }}",
-    "description": "WAF {{ extra_app.components[item.1].waf_policy.name | lower }}"
+    "description": "WAF {{ extra_app.components[item.1].waf_policy.name | lower }}",
+    "tags": ["{{extra_app.name | lower}}{{ index }}"]
   },
   "desiredState": {
     "ingress": {
@@ -142,8 +143,6 @@
         },
         "waf": {
           "isEnabled": true,
-          "isMonitorOnly": false,
-          "signatureOverrides": {}
         }
       {% endif -%}
     }

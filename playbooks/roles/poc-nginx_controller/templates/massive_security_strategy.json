@@ -6,6 +6,8 @@
     "tags": ["massive"]
   },
   "desiredState": {
-    "content": {{ lookup('url', item.waf_policy.url, split_lines=False, force=True) | from_json }}
+    "content": {
+      "securityPolicyRef": "/security/policies/{{ item.waf_policy.name }}"
+    }
   }
 }

@@ -97,7 +97,7 @@ Extra variable                                  Description                     
 ``extra_nginx_controller_username``             survey: NGINX Controller admin credential       ``XXXXXXXX@acme.com``
 ``extra_nginx_controller_password``             survey: NGINX Controller admin credential       ``XXXXXXXX``
 ``extra_app``                                   App specifications                              dict
-``extra_app.gateways.location``                 Location of instances                           ``nginxwaf``
+``extra_app.gateway.instance_group``            Group name of instances                         ``nginxwaf``
 ``extra_app.domain``                            Domain for all Apps                             ``f5app.dev``
 ``extra_app.environment``                       Resource Group used for RBAC                    ``massive``
 ``extra_app.components``                        PATH of each App                                dict
@@ -111,24 +111,29 @@ Extra variable                                  Description                     
 
 .. code:: yaml
 
+    ---
+    extra_project: "cloudbuilder"
     extra_app:
+      gateway:
+        instance_group: "nginxwaf"
+      name: "demo"
+      domain: "f5app.dev"
+      environment: massive
       components:
         - name: main
           uri: /
           waf_policy:
             name: web_factory_arcadia
-            url: >-
-              https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_web_factory.json
+            url: https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_web_factory.json
           workloads:
-            - 10.12.1.5
+            - 10.0.2.51
         - name: login
           uri: /trading/login.php
           waf_policy:
             name: bot_prevention
-            url: >-
-              https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_bot_prevention.json
+            url: https://raw.githubusercontent.com/nergalex/f5-nap-policies/master/policy/arcadia_bot_prevention.json
           workloads:
-            - 10.12.1.5
+            - 10.0.2.51
         - name: acme
           uri: /.well-known/acme-challenge
           waf_policy:
@@ -143,17 +148,6 @@ Extra variable                                  Description                     
             url: generic
           workloads:
             - 127.0.0.1
-      domain: f5app.dev
-      environment: massive
-      gateways:
-        location: nginxwaf
-      name: demo
-    extra_nb_app: 250
-    extra_nginx_controller:
-      ip: 10.0.0.4
-    extra_nginx_controller_password: $encrypted$
-    extra_nginx_controller_username: nergalex@acme.com
-    extra_project: cloudbuilder
 
 2) Delete Applications
 ==================================================

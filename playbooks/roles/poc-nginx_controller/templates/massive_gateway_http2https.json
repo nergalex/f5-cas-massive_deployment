@@ -2,7 +2,8 @@
   "metadata": {
     "name": "gw_{{extra_app.domain | lower}}_http2https",
     "displayName": "Gateway {{extra_app.domain | lower}} http2https",
-    "description": "Redirect HTTP to HTTPS"
+    "description": "Redirect HTTP to HTTPS",
+    "tags": ["massive"]
   },
   "desiredState": {
     "ingress": {
@@ -12,12 +13,10 @@
         }
       },
       "placement": {
-        "instanceRefs": [
-          {%- for gw in var_instance_ids -%}
+        "instanceGroupRefs": [
           {
-            "ref": "{{ gw.ref }}"
-          }{%- if not loop.last -%},{% endif %}
-          {%- endfor -%}
+            "ref": "/infrastructure/instance-groups/{{ extra_app.gateway.instance_group }}"
+          }
         ]
       }
     }

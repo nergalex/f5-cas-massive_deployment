@@ -2,7 +2,8 @@
   "metadata": {
     "name": "{{ extra_app.domain | lower }}_http2https",
     "displayName": "{{ extra_app.domain | lower }} http2https",
-    "description": "Redirect HTTP to HTTPS"
+    "description": "Redirect HTTP to HTTPS",
+    "tags": ["massive"]
   },
   "desiredState": {
     "ingress": {

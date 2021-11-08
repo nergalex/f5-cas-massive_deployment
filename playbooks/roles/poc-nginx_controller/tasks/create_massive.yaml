@@ -7,13 +7,13 @@
   include_role:
     name: nginxinc.nginx_controller_generate_token
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_user_email: "{{extra_nginx_controller_username}}"
     nginx_controller_user_password: "{{extra_nginx_controller_password}}"
 
 - name: Create WAF policy
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/security/policies/{{ item.waf_policy.name }}"
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/security/policies/{{ item.waf_policy.name }}"
     method: PUT
     headers:
       "Content-Type": "application/json"
@@ -26,41 +26,33 @@
   loop: "{{ extra_app.components }}"
   when: item.waf_policy.name != 'generic'
 
-# Pre-requisites - Define instances from a specific location. A location is a Azure VM Scale Set
-- name: GET instances ID
+- name: Create Security strategy
   uri:
-    url: "https://{{ extra_nginx_controller.ip }}/api/v1/infrastructure/locations/{{ extra_app.gateways.location | lower }}/instances"
-    method: GET
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/security/strategies/{{ item.waf_policy.name }}"
+    method: PUT
     headers:
       "Content-Type": "application/json"
-      "Cookie": "session={{ nginx_controller_auth_token }}"
+      "Cookie": "{{ nginx_controller_auth_token }}"
+    body: "{{ lookup('template','massive_security_strategy.json') }}"
+    body_format: json
     return_content: yes
     validate_certs: no
-    status_code: 200
-  register: instances
+    status_code: 200, 201, 202
+  loop: "{{ extra_app.components }}"
+  when: item.waf_policy.name != 'generic'
 
-- name: SET var_instance_ids
-  set_fact:
-    var_instance_ids: "{{ var_instance_ids }} + [ {
-      'name': '{{ item.metadata.name }}',
-      'location': '{{ extra_app.gateways.location | lower }}',
-      'ref': '{{ item.metadata.ref }}'
-    }]"
-  loop: "{{ instances.json['items'] }}"
-
-# Launch massive deployment
 - name: Create the environment
   include_role:
     name: nginxinc.nginx_controller_environment
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environment: "{{ lookup('template','massive_environment.json') }}"
 
 - name: Create certificate object
   include_role:
     name: nginxinc.nginx_controller_certificate
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_certificate: "{{ lookup('template','massive_cert.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
@@ -71,7 +63,7 @@
   include_role:
     name: nginxinc.nginx_controller_gateway
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_gateway: "{{ lookup('template','massive_gateway_http2https.json') }}"
 
@@ -79,15 +71,15 @@
   include_role:
     name: nginxinc.nginx_controller_application
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_app: "{{ lookup('template','massive_application_http2https.json') }}"
 
-- name: Create generic components http2https
+- name: Create generic component http2https
   include_role:
     name: nginxinc.nginx_controller_component
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_appName: "app_{{ extra_app.domain | lower}}_http2https"
     nginx_controller_component: "{{ lookup('template','massive_component_http2https.json') }}"
@@ -96,10 +88,10 @@
   include_role:
     name: nginxinc.nginx_controller_gateway
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_gateway: "{{ lookup('template','massive_gateway_SAN.json') }}"
-  loop: "{{ range(153, 154) | list }}"
+  loop: "{{ range(0, extra_nb_app) | list }}"
   loop_control:
     index_var: index
 
@@ -107,7 +99,7 @@
   include_role:
     name: nginxinc.nginx_controller_application
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_app: "{{ lookup('template','massive_application_SAN.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
@@ -118,7 +110,7 @@
   include_role:
     name: nginxinc.nginx_controller_component
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_appName: "san_{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}"
     nginx_controller_component: "{{ lookup('template','massive_component_SAN.json') }}"
@@ -130,7 +122,7 @@
   include_role:
     name: nginxinc.nginx_controller_gateway
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_gateway: "{{ lookup('template','massive_gateway_CN.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
@@ -141,7 +133,7 @@
   include_role:
     name: nginxinc.nginx_controller_application
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_app: "{{ lookup('template','massive_application_CN.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
@@ -152,12 +144,10 @@
   include_role:
     name: nginxinc.nginx_controller_component
   vars:
-    nginx_controller_fqdn: "{{extra_nginx_controller.ip}}"
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_appName: "cn_{{ extra_app.name | lower }}{{ item.0 }}.{{ extra_app.domain | lower }}"
     nginx_controller_component: "{{ lookup('template','massive_component_cas.json') }}"
   loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
-
-
-
-
+  loop_control:
+    index_var: index

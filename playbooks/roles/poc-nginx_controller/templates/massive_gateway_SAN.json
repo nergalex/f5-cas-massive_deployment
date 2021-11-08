@@ -2,7 +2,8 @@
   "metadata": {
     "name": "san_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}",
     "displayName": "SAN of {{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}",
-    "description": "Redirect SAN to CN"
+    "description": "Redirect SAN to CN",
+    "tags": ["{{extra_app.name | lower}}{{ index }}"]
   },
   "desiredState": {
     "ingress": {
@@ -29,12 +30,10 @@
       },
       "clientMaxBodySize": "128m",
       "placement": {
-        "instanceRefs": [
-          {%- for gw in var_instance_ids -%}
+        "instanceGroupRefs": [
           {
-            "ref": "{{ gw.ref }}"
-          }{%- if not loop.last -%},{% endif %}
-          {%- endfor -%}
+            "ref": "/infrastructure/instance-groups/{{ extra_app.gateway.instance_group }}"
+          }
         ]
       }
     }
