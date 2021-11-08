@@ -7,7 +7,7 @@
   },
   "desiredState": {
     "type": "PEM",
-    "privateKey": "{%- for line in stats_key_pair.key.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}",
-    "publicCert": "{%- for line in stats_key_pair.crt.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}"
+    "privateKey": "{%- for line in var_key_pair.key.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}",
+    "publicCert": "{%- for line in var_key_pair.crt.split('\n') -%}{%- if line != '' -%}{{ line }}\n{%- endif -%}{%- endfor -%}"
   }
 }
