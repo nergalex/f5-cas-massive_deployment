@@ -1,0 +1,162 @@
+- name: SET variables
+  set_fact:
+    var_env_prefix: "env_north_"
+    var_instance_ids: []
+    stats_key_pair:
+      - key: "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAzENQmnOuBlRS5tXHkYN6svTU/fcK6ql7eKU9f1XNvFVT3r2U\nqzDGeYCHZJFo/jHAMaE+NelFeNq9K8/bPyOF3NC9ofZ6zVxndaVRcVBp5MOdntSh\nKX/I2J6gtt98maUaftsf/EdABzoS/QVXG7LTTIhZ9J6SPYprJ+Cd2LUpbo1dtBze\nx9SUWuKS2YwAaH8tJJQW8J2luYxrYsALLww5eZnGwfk6JkrqpGT8LrIDjz0NDUe8\nvuV0vTzq2KbhoLhytx+nHUKp2LRix75chuebAInHNPesQb2ThLCs9nVYDldxWpP5\nTvbJzLImcNAx40bpTOFQ3lnwgL69MKU+q0xk2wIDAQABAoIBAQClK2GIIzZ7Q8Bt\njDx9+/VBtBxu6E7ZhgajfeqGhtmACvdwy5fl/eDf6wCQX8yoj448E4h8i45ztVz2\ninNdUNozvk85IlgWqzu1s+JxYHbgVxWjk4hmSEAeeda3SWw1yX3tSj9I/kxWC63D\nD4hqi2W1IySqW3chcEZJzqWU0JkaHJ32ifZRjNiDyelOJwvi169f837z4aCm7WUj\n065SdfvvgbZFBB5Gc/j79PBW93PY6NFPUHJJzTNRcCXyB1fhobPT/iil9ET2431K\nNs1jns7PFzdX6f066MqC2YUwDggVyDQEg8/rwdYEM8Nj4IKRIu/rlU2QIBE+7ECV\nLZ5nbx6BAoGBAP2R8BgRlmEYPZ79unNKM/tIpVL4Cj3/F5bg23wXj7GIroN/uwKP\n3r7AMBTj0YFxyjm/zWRsXwh6ObYEYyYUFJbB9V506rpE0zjIfCpWYVbkgv2zXCps\nQ9mHAbLtE8yn5xKthVVvIpORz+2iYi3jFztwD8eEnjtqyN2Pklbz4YAhAoGBAM44\nan1TYZSJ4s9Hr+tixrwlP9cYFD0DJigLUsHI6IF18JjRNiwstJ2qTkraukYdlKE8\nfAwfAzlweOpAXE1bB8pYpj8/LIg2sUVyX+M+XlBU7Dw9jiZEjaa6S2pBtg/5y1fc\nd4NneiiKHlPwAPvZIJetZONDT4zcPE7dTW+0zTV7AoGBAIbapFvIjrdYkv0JZ62E\n2xxayEHV1GygS8VcFJ5sUWlTjaw1tBlqtkWwJGIXvwYepDQOQ4eS8v+pMSQSNUC9\nES4UPRBdEbC6hbL/PLmvctkpcljGmM+fAH6hhE/KMet3qDaQvgZvsm3U8EYrRBev\nXF2p/VpYt2ZWJjle7676yQTBAoGAPRRCnjobFda9Qe2Wsl5ARKu3u+qa2/NZ0tR/\nv3vVObsH9wtIQ08+c9BkfhFIyMmsIxF6IFDzMIkaly9W52aF6S3Wl7cLZpDkcpBM\nzE7Fun9ctP76YmU9m1tkSOWLmjG/Q5e+IkJ80RMPpobYk7+cwrANyK5AGpWEm0s6\ny1I+0Y8CgYBXLTTZuplfpeFPGqPs9abaCPXd7/Wh1x1a5pkBlv6ZqwyZ0P3IxD9k\nheGFq0SK5Z5E8AmyNUn//CtRal9r+S8h9cafbkd+rwyExqk8ykLjJylXcpSKGkLj\nnY22zkounsyBlTVOC1eimAzkYNnIY08Zoanrv8SrnintijOXKzbgig==\n-----END RSA PRIVATE KEY-----\n",
+        cn: generic.f5app.dev,
+        crt: "-----BEGIN CERTIFICATE-----\nMIIEADCCAuigAwIBAgIUKuHSSSwne3bjFC9Y1SZgUYCyqzswDQYJKoZIhvcNAQEL\nBQAwgYQxCzAJBgNVBAYTAkZSMQwwCgYDVQQIDANJZEYxETAPBgNVBAcMCFN1cmVz\nbmVzMQswCQYDVQQKDAJGNTELMAkGA1UECwwCU0UxGDAWBgNVBAMMD2RlbW8wLmY1\nYXBwLmRldjEgMB4GCSqGSIb3DQEJARYRYWwuZGFjb3N0YUBmNS5jb20wHhcNMjEw\nNzE5MTYwNDQ4WhcNMzEwNzE3MTYwNDQ4WjCBhDELMAkGA1UEBhMCRlIxDDAKBgNV\nBAgMA0lkRjERMA8GA1UEBwwIU3VyZXNuZXMxCzAJBgNVBAoMAkY1MQswCQYDVQQL\nDAJTRTEYMBYGA1UEAwwPZGVtbzAuZjVhcHAuZGV2MSAwHgYJKoZIhvcNAQkBFhFh\nbC5kYWNvc3RhQGY1LmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\nAMxDUJpzrgZUUubVx5GDerL01P33Cuqpe3ilPX9VzbxVU969lKswxnmAh2SRaP4x\nwDGhPjXpRXjavSvP2z8jhdzQvaH2es1cZ3WlUXFQaeTDnZ7UoSl/yNieoLbffJml\nGn7bH/xHQAc6Ev0FVxuy00yIWfSekj2Kayfgndi1KW6NXbQc3sfUlFriktmMAGh/\nLSSUFvCdpbmMa2LACy8MOXmZxsH5OiZK6qRk/C6yA489DQ1HvL7ldL086tim4aC4\ncrcfpx1Cqdi0Yse+XIbnmwCJxzT3rEG9k4SwrPZ1WA5XcVqT+U72ycyyJnDQMeNG\n6UzhUN5Z8IC+vTClPqtMZNsCAwEAAaNoMGYwRQYDVR0RBD4wPIIPZGVtbzAuZjVh\ncHAuZGV2ghN3d3cuZGVtbzAuZjVhcHAuZGV2ghR3d3cxLmRlbW8wLmY1YXBwLmRl\ndjAdBgNVHQ4EFgQUPfYltML7tezVCjR+4ENlFcck5QkwDQYJKoZIhvcNAQELBQAD\nggEBAFCChPtefw5aP/oVmNlplwt8RiXljY1ccxojxYI1O+wIaxvwbdzXFPxWssKy\n1LGg0pYJ1GwDGFejMrDmfACimg0mAPBZA/DcI10wkKODJK9ELEn4C0Aq0L7t7kL8\nygxVNlrBrkZJIxEl7/tOD18Bgc7Y0wmxyZ0pqMiPOSc9BRP++vE0HCAKHIybTd62\nE0+fIY47Fg0KxPt6p4iErGw/fSGpjH5fPG7bm2SPH7b405+uPzzwoT4+rkcLvGnQ\nUQK7E5yn9M/iXwbnLKP877mkQ6hzywtXbZTyIldrE1p3Kci4w7XuJqDA73KPl8sX\nsSMVZkMetx3c00LiJY/lEVH8Jm0=\n-----END CERTIFICATE-----\n",
+        san:
+          - "generic.f5app.dev",
+          - "www.generic.f5app.dev",
+          - "www1.generic.f5app.dev"
+    ]
+
+- name: Retrieve the NGINX Controller auth token
+  include_role:
+    name: nginxinc.nginx_controller_generate_token
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_user_email: "{{extra_nginx_controller_username}}"
+    nginx_controller_user_password: "{{extra_nginx_controller_password}}"
+
+- name: Create WAF policy
+  uri:
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/security/policies/{{ item.waf_policy.name }}"
+    method: PUT
+    headers:
+      "Content-Type": "application/json"
+      "Cookie": "{{ nginx_controller_auth_token }}"
+    body: "{{ lookup('template','massive_policy_waf.json') }}"
+    body_format: json
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+  loop: "{{ extra_app.components }}"
+  when: item.waf_policy.name != 'generic'
+
+- name: Create Security strategy
+  uri:
+    url: "https://{{ extra_nginx_controller_ip }}/api/v1/security/strategies/{{ item.waf_policy.name }}"
+    method: PUT
+    headers:
+      "Content-Type": "application/json"
+      "Cookie": "{{ nginx_controller_auth_token }}"
+    body: "{{ lookup('template','massive_security_strategy.json') }}"
+    body_format: json
+    return_content: yes
+    validate_certs: no
+    status_code: 200, 201, 202
+  loop: "{{ extra_app.components }}"
+  when: item.waf_policy.name != 'generic'
+
+- name: Create the environment
+  include_role:
+    name: nginxinc.nginx_controller_environment
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environment: "{{ lookup('template','massive_environment.json') }}"
+
+- name: Create certificate object
+  include_role:
+    name: nginxinc.nginx_controller_certificate
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_certificate: "{{ lookup('template','massive_cert.json') }}"
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create generic gateway http2https
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_gateway: "{{ lookup('template','massive_gateway_http2https.json') }}"
+
+- name: Create generic application http2https
+  include_role:
+    name: nginxinc.nginx_controller_application
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_app: "{{ lookup('template','massive_application_http2https.json') }}"
+
+- name: Create generic component http2https
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_appName: "app_{{ extra_app.domain | lower}}_http2https"
+    nginx_controller_component: "{{ lookup('template','massive_component_http2https.json') }}"
+
+- name: Create gateways SAN
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_gateway: "{{ lookup('template','massive_gateway_SAN.json') }}"
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create applications SAN
+  include_role:
+    name: nginxinc.nginx_controller_application
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_app: "{{ lookup('template','massive_application_SAN.json') }}"
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create components SAN
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_appName: "san_{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}"
+    nginx_controller_component: "{{ lookup('template','massive_component_SAN.json') }}"
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create gateways CN
+  include_role:
+    name: nginxinc.nginx_controller_gateway
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_gateway: "{{ lookup('template','massive_gateway_CN.json') }}"
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create applications CN
+  include_role:
+    name: nginxinc.nginx_controller_application
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_app: "{{ lookup('template','massive_application_CN.json') }}"
+  loop: "{{ range(0, extra_nb_app) | list }}"
+  loop_control:
+    index_var: index
+
+- name: Create components CN
+  include_role:
+    name: nginxinc.nginx_controller_component
+  vars:
+    nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
+    nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
+    nginx_controller_appName: "cn_{{ extra_app.name | lower }}{{ item.0 }}.{{ extra_app.domain | lower }}"
+    nginx_controller_component: "{{ lookup('template','massive_component_cas.json') }}"
+  loop: "{{ range(0, extra_nb_app) | product(range(0,extra_app.components|length)) | list }}"
+  loop_control:
+    index_var: index
