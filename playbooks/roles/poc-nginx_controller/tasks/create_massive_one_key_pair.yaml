@@ -63,7 +63,7 @@
   vars:
     nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
-    nginx_controller_certificate: "{{ lookup('template','massive_cert.json') }}"
+    nginx_controller_certificate: "{{ lookup('template','massive_cert_one_key_pair.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
   loop_control:
     index_var: index
