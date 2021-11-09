@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "name": "san_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}",
+    "displayName": "SAN of {{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}",
+    "description": "Redirect SAN to CN",
+    "tags": ["{{extra_app.name | lower}}{{ index }}"]
+  },
+  "desiredState": {
+    "ingress": {
+      "uris": {
+        "/": {
+          "matchMethod": "PREFIX"
+        }
+      },
+      "gatewayRefs": [
+        {
+          "ref": "/services/environments/{{ var_env_prefix }}{{extra_app.environment | lower}}/gateways/san_{{extra_app.name | lower}}{{ index }}.{{extra_app.domain | lower}}"
+        }
+      ]
+    },
+    "backend": {
+      "ntlmAuthentication": "DISABLED",
+      "preserveHostHeader": "DISABLED"
+    },
+    "programmability": {
+      "uriRedirects": [
+        {
+          "responseCode": 301,
+          "url": "https://{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower }}$request_uri"
+        }
+      ]
+    },
+    "logging": {
+      "accessLog": {
+        "state": "DISABLED"
+      },
+      "errorLog": "DISABLED"
+    },
+    "security": {
+      "strategyRef": {
+        "ref": "/security/strategies/balanced_default"
+      },
+      "waf": {
+        "isEnabled": false
+      }
+    }
+  }
+}

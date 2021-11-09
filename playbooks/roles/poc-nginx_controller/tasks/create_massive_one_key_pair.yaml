@@ -98,7 +98,7 @@
   vars:
     nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
-    nginx_controller_gateway: "{{ lookup('template','massive_gateway_SAN.json') }}"
+    nginx_controller_gateway: "{{ lookup('template','massive_gateway_SAN_one_key_pair.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
   loop_control:
     index_var: index
@@ -121,7 +121,7 @@
     nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
     nginx_controller_appName: "san_{{ extra_app.name | lower}}{{ index }}.{{ extra_app.domain | lower}}"
-    nginx_controller_component: "{{ lookup('template','massive_component_SAN.json') }}"
+    nginx_controller_component: "{{ lookup('template','massive_component_SAN_one_key_pair.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
   loop_control:
     index_var: index
@@ -132,7 +132,7 @@
   vars:
     nginx_controller_fqdn: "{{extra_nginx_controller_ip}}"
     nginx_controller_environmentName: "{{ var_env_prefix }}{{ extra_app.environment | lower }}"
-    nginx_controller_gateway: "{{ lookup('template','massive_gateway_CN.json') }}"
+    nginx_controller_gateway: "{{ lookup('template','massive_gateway_CN_one_key_pair.json') }}"
   loop: "{{ range(0, extra_nb_app) | list }}"
   loop_control:
     index_var: index
